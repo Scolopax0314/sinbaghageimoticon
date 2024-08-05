@@ -13,16 +13,6 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 
-
-def maxmin(Mm, a, b):
-    if a > b:
-        if Mm:
-            return a
-        return b
-    if Mm:
-        return b
-    return a
-
 def enum_child(parent_hwnd):
     child_windows = []
 
@@ -46,7 +36,6 @@ def setClipboard():
     imageLoad("output_image").convert("RGB").save(bitmap, "BMP")
     convData = bitmap.getvalue()[14:]
     bitmap.close()
-
     win32clipboard.OpenClipboard()
     win32clipboard.EmptyClipboard()
     win32clipboard.SetClipboardData(win32clipboard.CF_DIB, convData)
@@ -67,17 +56,13 @@ def imageLoad(name):
 def makeimg(input):
     baseimg = imageLoad("baseimg")
     outputimg = baseimg.copy()
-
     draw = ImageDraw.Draw(outputimg)
-
     font_path = os.path.join("font", "malgunbd.ttf")
     text = input
     font_size = 50
     font = ImageFont.truetype(font_path, font_size)
     position = (385, 70)
-
     draw.text(position, text, fill="black", font=font)
-
     output_path = os.path.join("images", 'output_image.png')
     outputimg.save(output_path)
 
@@ -88,16 +73,13 @@ def active_title():
 
 def next_title(current_title, key_title):
     titles = []
-
     def enum_windows_proc(hwnd, lParam):
         if win32gui.IsWindowVisible(hwnd):
             title = win32gui.GetWindowText(hwnd)
             if title:
                 titles.append(title)
         return True
-
     win32gui.EnumWindows(enum_windows_proc, None)
-
     if current_title in titles:
         current_index = titles.index(current_title)
         next_index = (current_index + 1) % len(titles)
@@ -135,7 +117,6 @@ def hook(nCode, wParam, lParam):
     if nCode == win32con.HC_ACTION:
         kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
         vk_code = kb.vkCode
-
         if wParam == win32con.WM_KEYDOWN and vk_code == win32con.VK_RETURN:
             if Run:
                 current_hwnd = win32gui.GetForegroundWindow()
@@ -148,15 +129,12 @@ def hook(nCode, wParam, lParam):
                             makeimg(message)
                             SendImage()
                         return 1 
-
     return user32.CallNextHookEx(None, nCode, wParam, ctypes.c_void_p(lParam))
 
 HOOKPROC = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_int, ctypes.wintypes.WPARAM, ctypes.wintypes.LPARAM)
 keyboard_proc = HOOKPROC(hook)
-
 module_handle = win32api.GetModuleHandle(None)
 module_handle = ctypes.c_void_p(module_handle)
-
 hooked = user32.SetWindowsHookExW(win32con.WH_KEYBOARD_LL, keyboard_proc, module_handle, 0)
 
 def run_program():
