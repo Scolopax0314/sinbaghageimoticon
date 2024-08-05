@@ -69,7 +69,7 @@ def makeimg(input):
 def active_title():
     hwnd = win32gui.GetForegroundWindow()
     title = win32gui.GetWindowText(hwnd)
-    return title
+    return title                    
 
 def next_title(current_title, key_title):
     titles = []
