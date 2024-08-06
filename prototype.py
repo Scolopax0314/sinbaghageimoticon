@@ -59,9 +59,9 @@ def makeimg(input):
     draw = ImageDraw.Draw(outputimg)
     font_path = os.path.join("font", "malgunbd.ttf")
     text = input
-    font_size = 50
+    font_size = 30
     font = ImageFont.truetype(font_path, font_size)
-    position = (385, 70)
+    position = (164, 50)
     draw.text(position, text, fill="black", font=font)
     output_path = os.path.join("images", 'output_image.png')
     outputimg.save(output_path)
