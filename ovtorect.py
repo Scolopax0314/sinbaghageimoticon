@@ -1,35 +1,86 @@
 from math import sqrt
 import cv2
 import numpy as np
-import fontTools
+from PIL import Image, ImageGrab, ImageFont, ImageDraw
+import os
 
-h = 20
+def imageLoad(name):
+    imagename = name + ".png"
+    imagepath = os.path.join("images", imagename)
+    image = Image.open(imagepath)
+    return image
+
+textbox = 0
+baseimg = imageLoad("baseimg")
+mid = (164, 50)
 a, b = 55, 36
-rect = []
-n = int(2 * b / h)
+outputimg = baseimg.copy()
+draw = ImageDraw.Draw(outputimg)
+font_path = os.path.join("font", "malgunbd.ttf")
+text = input()
+text_size = 1
+font_size = 255
 
-if n % 2:
-    for i in range(0, n, 2):
-        y = i * h / 2
-        l = sqrt(1 - ((y + h/2) / b) ** 2) * a
-        rect.append((y, l))
-        if i == 1: continue
-        rect.append((-y, l))
-else:
-    for i in range(1, n, 2):
-        y = i * h / 2
-        l = sqrt(1 - ((y + h/2) / b) ** 2) * a
-        rect.append((y, l))
-        rect.append((-y, l))
+while textbox < text_size * 1.33:
+    font = ImageFont.truetype(font_path, font_size / 1.33)
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_size = 1.33 * (bbox[2] - bbox[0])
+    rect = []
+    n = int(2 * b / font_size)
+    if n % 2:
+        for i in range(0, n, 2):
+            y = i * font_size / 2
+            l = sqrt(1 - ((y + font_size/2) / b) ** 2) * a - font_size/2
+            y, l = int(y), int(l)
+            if l >= 2 * font_size:
+                rect.append((y, l))
+                if y == 0: continue
+                rect.append((-y, l))
+    else:
+        for i in range(1, n, 2):
+            y = i * font_size / 2
+            l = sqrt(1 - ((y + font_size/2) / b) ** 2) * a - font_size/2
+            y, l = int(y), int(l)
+            if l >= 2 * font_size:
+                rect.append((y, l))
+                if y == 0: continue
+                rect.append((-y, l))
+    textbox = 2 * sum(yl[1] for yl in rect)
+    font_size -= 1
 
+rect = sorted(rect, key=lambda x: x[0])
 print(rect)
+
+for y, l in rect:
+    position = (mid[0] - l, mid[1] + y - font_size)
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_size = (bbox[2] - bbox[0])
+    prt = len(text)
+    while text_size > 2 * l:
+        bbox = draw.textbbox((0, 0), text[:prt], font=font)
+        text_size = (bbox[2] - bbox[0])
+        prt -= 1
+    print(prt)
+    draw.text(position, text[:prt], fill="black", font=font)
+    text = text[prt:]
+
+output_path = os.path.join("images", 'output_image.png')
+outputimg.save(output_path)
+'''
+position = (164, 50)
+draw.text(position, text, fill="black", font=font)
+
+output_path = os.path.join("images", 'output_image.png')
+outputimg.save(output_path)
+'''
+
+
 
 img = np.zeros((225, 225, 3))
 
 for y, l in rect:
-    y, l = int(y), int(l)
     print(y, l)
-    cv2.rectangle(img, (164 - l, y + 50 + h//2), (164 + l, y + 50 - h//2), (0, 0, 255), 1)
+    cv2.rectangle(img, (164 - l, y + 50 + font_size//2), (164 + l, y + 50 - font_size//2), (0, 0, 255), 1)
 cv2.ellipse(img, (164, 50), (a, b), 0, 0, 360, (0, 0, 255), 1)
 cv2.imshow('image', img)
 cv2.waitKey(0)

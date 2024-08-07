@@ -12,6 +12,7 @@ import os
 import threading
 import tkinter as tk
 from tkinter import ttk
+from math import *
 
 def enum_child(parent_hwnd):
     child_windows = []
@@ -52,15 +53,60 @@ def imageLoad(name):
     return image
 
 def makeimg(input):
+    textbox = 0
     baseimg = imageLoad("baseimg")
+    mid = (164, 50)
+    a, b = 55, 36
     outputimg = baseimg.copy()
     draw = ImageDraw.Draw(outputimg)
     font_path = os.path.join("font", "malgunbd.ttf")
     text = input
-    font_size = 30   
-    font = ImageFont.truetype(font_path, font_size)
-    position = (164, 50)
-    draw.text(position, text, fill="black", font=font)
+    text_size = 1
+    font_size = 255
+
+    while textbox < text_size:
+        font = ImageFont.truetype(font_path, font_size / 1.33)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_size = 1.33 * (bbox[2] - bbox[0])
+        rect = []
+        n = int(2 * b / font_size)
+        if n % 2:
+            for i in range(0, n, 2):
+                y = i * font_size / 2
+                l = sqrt(1 - ((y + font_size/2) / b) ** 2) * a - font_size/2
+                y, l = int(y), int(l)
+                if l >= 2 * font_size:
+                    rect.append((y, l))
+                    if y == 0: continue
+                    rect.append((-y, l))
+        else:
+            for i in range(1, n, 2):
+                y = i * font_size / 2
+                l = sqrt(1 - ((y + font_size/2) / b) ** 2) * a - font_size/2
+                y, l = int(y), int(l)
+                if l >= 2 * font_size:
+                    rect.append((y, l))
+                    if y == 0: continue
+                    rect.append((-y, l))
+        textbox = 2 * sum(yl[1] for yl in rect)
+        font_size -= 1
+
+    rect = sorted(rect, key=lambda x: x[0])
+    print(rect)
+
+    for y, l in rect:
+        position = (mid[0] - l, mid[1] + y - font_size)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_size = (bbox[2] - bbox[0])
+        prt = len(text)
+        while text_size > 2 * l:
+            bbox = draw.textbbox((0, 0), text[:prt], font=font)
+            text_size = (bbox[2] - bbox[0])
+            prt -= 1
+        print(prt)
+        draw.text(position, text[:prt], fill="black", font=font)
+        text = text[prt:]
+
     output_path = os.path.join("images", 'output_image.png')
     outputimg.save(output_path)
 
