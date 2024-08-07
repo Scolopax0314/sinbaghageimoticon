@@ -15,13 +15,11 @@ from tkinter import ttk
 
 def enum_child(parent_hwnd):
     child_windows = []
-
     def enum_child_proc(hwnd, lParam):
         title = win32gui.GetWindowText(hwnd)
         class_name = win32gui.GetClassName(hwnd)
         child_windows.append((hwnd, title, class_name))
         return True
-
     win32gui.EnumChildWindows(parent_hwnd, enum_child_proc, None)
     return child_windows
 
@@ -59,7 +57,7 @@ def makeimg(input):
     draw = ImageDraw.Draw(outputimg)
     font_path = os.path.join("font", "malgunbd.ttf")
     text = input
-    font_size = 30
+    font_size = 30   
     font = ImageFont.truetype(font_path, font_size)
     position = (164, 50)
     draw.text(position, text, fill="black", font=font)
