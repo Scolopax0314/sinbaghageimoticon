@@ -98,6 +98,10 @@ def makeimg(input):
         font_size = int(0.95 * font_size)
 
     rect = sorted(rect, key=lambda x: x[0])
+    while textbox > text_size * 1.33:
+        text = ' '+text+' '
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_size = (bbox[2] - bbox[0])
     for y, l in rect:
         position = (mid[0] - l, mid[1] + y - font_size)
         bbox = draw.textbbox((0, 0), text, font=font)
