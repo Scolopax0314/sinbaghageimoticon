@@ -72,7 +72,7 @@ def makeimg(input):
     a, b = results[1]
     outputimg = baseimg.copy()
     draw = ImageDraw.Draw(outputimg)
-    font_path = os.path.join(font_folder, selected_font.get())
+    font_path = os.path.join(font_folder, selected_font.get() + '.ttf')
     text_size = 1
     font_size = results[2]
     text = input
@@ -83,29 +83,18 @@ def makeimg(input):
         text_size = bbox[2] - bbox[0]
         rect = []
         n = int(2 * b / font_size)
-        if n % 2:
-            for i in range(0, n, 2):
+        n -= (n+1)%2
+        for i in range(0, n, 2):
                 y = i * font_size / 2
-                l = sqrt(1 - ((y + font_size/2) / b) ** 2) * a - a*(a/b)/10
+                l = sqrt(1 - ((y + font_size/2) / b) ** 2) * a - a*(a/b)/12
                 y, l = int(y), int(l)
-                if 1.8 * l >= font_size:
-                    rect.append((y, l))
-                    if y == 0: continue
-                    rect.append((-y, l))
-        else:
-            for i in range(1, n, 2):
-                y = i * font_size / 2
-                l = sqrt(1 - ((y + font_size/2) / b) ** 2) * a - a*(a/b)/10
-                y, l = int(y), int(l)
-                if 1.8 * l >= font_size:
+                if l >= font_size:
                     rect.append((y, l))
                     if y == 0: continue
                     rect.append((-y, l))
         textbox = 2 * sum(yl[1] for yl in rect)
         font_size = int(0.95 * font_size)
-
     rect = sorted(rect, key=lambda x: x[0])
-
     for y, l in rect:
         position = (mid[0] - l, mid[1] + y - font_size)
         bbox = draw.textbbox((0, 0), text, font=font)
@@ -230,7 +219,7 @@ status_label = ttk.Label(main_frame, text="기능 비활성화됨")
 status_label.grid(row=1, column=0, padx=5, pady=5)
 
 font_folder = "font"
-fonts = [f for f in os.listdir(font_folder) if f.endswith('.ttf')]
+fonts = [os.path.splitext(f)[0] for f in os.listdir(font_folder) if f.endswith('.ttf')]
 selected_font = tk.StringVar(value=fonts[0])
 
 font_label = ttk.Label(main_frame, text="폰트 선택:")

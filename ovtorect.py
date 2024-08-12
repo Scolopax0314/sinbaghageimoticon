@@ -27,17 +27,8 @@ while textbox <= text_size * 1.33:
     text_size = (bbox[2] - bbox[0])
     rect = []
     n = int(2 * b / font_size)
-    if n % 2:
-        for i in range(0, n, 2):
-            y = i * font_size / 2
-            l = sqrt(1 - ((y + font_size/2) / b) ** 2) * a - a*(a/b)/10
-            y, l = int(y), int(l)
-            if 1.8 * l >= font_size:
-                rect.append((y, l))
-                if y == 0: continue
-                rect.append((-y, l))
-    else:
-        for i in range(1, n, 2):
+    n -= (n+1) % 2
+    for i in range(0, n, 2):
             y = i * font_size / 2
             l = sqrt(1 - ((y + font_size/2) / b) ** 2) * a - a*(a/b)/10
             y, l = int(y), int(l)
