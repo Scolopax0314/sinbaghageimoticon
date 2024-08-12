@@ -14,6 +14,7 @@ import tkinter as tk
 from tkinter import ttk
 from math import *
 import re
+import cv2
 
 with open('images/imginf.txt', 'r') as file:
     lines = file.read().splitlines()
@@ -68,13 +69,14 @@ def makeimg(input):
     global results
     textbox = 0
     baseimg = imageLoad("baseimg")
-    mid = results[0]
-    a, b = results[1]
-    outputimg = baseimg.copy()
+    rate = 800 / baseimg.size[0]
+    mid = results[0][0] * rate, results[0][1] * rate
+    a, b = results[1][0] * rate, results[1][1] * rate
+    outputimg = baseimg.copy().resize((800, int(baseimg.size[1]*rate)), Image.Resampling.LANCZOS)
     draw = ImageDraw.Draw(outputimg)
     font_path = os.path.join(font_folder, selected_font.get() + '.ttf')
     text_size = 1
-    font_size = results[2]
+    font_size = results[2] * rate
     text = input
 
     while textbox < text_size * 1.33 :
