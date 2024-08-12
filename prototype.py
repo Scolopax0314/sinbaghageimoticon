@@ -94,6 +94,7 @@ def makeimg(input):
                     rect.append((-y, l))
         textbox = 2 * sum(yl[1] for yl in rect)
         font_size = int(0.95 * font_size)
+
     rect = sorted(rect, key=lambda x: x[0])
     for y, l in rect:
         position = (mid[0] - l, mid[1] + y - font_size)
@@ -206,6 +207,7 @@ def on_closing():
     user32.UnhookWindowsHookEx(hooked)
     root.destroy()
 
+Run = False
 root = tk.Tk()
 root.title("기능 On/Off 설정")
 
