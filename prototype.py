@@ -13,6 +13,18 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from math import *
+import re
+
+with open('images/imginf.txt', 'r') as file:
+    lines = file.read().splitlines()
+results = []
+pattern = re.compile(r'\d+')
+for line in lines:
+    numbers = list(map(int, pattern.findall(line)))  
+    if len(numbers) == 2:
+        results.append(tuple(numbers))  
+    elif len(numbers) == 1:
+        results.append(numbers[0])
 
 def enum_child(parent_hwnd):
     child_windows = []
@@ -53,16 +65,17 @@ def imageLoad(name):
     return image
 
 def makeimg(input):
+    global results
     textbox = 0
     baseimg = imageLoad("baseimg")
-    mid = (164, 50)
-    a, b = 55, 36
+    mid = results[0]
+    a, b = results[1]
     outputimg = baseimg.copy()
     draw = ImageDraw.Draw(outputimg)
-    font_path = os.path.join("font", "malgunbd.ttf")
-    text = input
+    font_path = os.path.join(font_folder, selected_font.get())
     text_size = 1
-    font_size = 255
+    font_size = results[2]
+    text = input
 
     while textbox < text_size:
         font = ImageFont.truetype(font_path, font_size / 1.33)
@@ -89,10 +102,9 @@ def makeimg(input):
                     if y == 0: continue
                     rect.append((-y, l))
         textbox = 2 * sum(yl[1] for yl in rect)
-        font_size -= 1
+        font_size = 0.95 * font_size
 
     rect = sorted(rect, key=lambda x: x[0])
-    print(rect)
 
     for y, l in rect:
         position = (mid[0] - l, mid[1] + y - font_size)
@@ -103,7 +115,6 @@ def makeimg(input):
             bbox = draw.textbbox((0, 0), text[:prt], font=font)
             text_size = (bbox[2] - bbox[0])
             prt -= 1
-        print(prt)
         draw.text(position, text[:prt], fill="black", font=font)
         text = text[prt:]
 
@@ -217,6 +228,17 @@ toggle_button.grid(row=0, column=0, padx=5, pady=5)
 
 status_label = ttk.Label(main_frame, text="기능 비활성화됨")
 status_label.grid(row=1, column=0, padx=5, pady=5)
+
+font_folder = "font"
+fonts = [f for f in os.listdir(font_folder) if f.endswith('.ttf')]
+selected_font = tk.StringVar(value=fonts[0])
+
+font_label = ttk.Label(main_frame, text="폰트 선택:")
+font_label.grid(row=2, column=0, padx=5, pady=5)
+
+font_menu = ttk.Combobox(main_frame, textvariable=selected_font, values=fonts)
+font_menu.grid(row=3, column=0, padx=5, pady=5)
+font_menu.current(0) 
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
