@@ -20,16 +20,17 @@ from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal
 
-with open('images/imginf.txt', 'r') as file:
-    lines = file.read().splitlines()
-results = []
-pattern = re.compile(r'\d+')
-for line in lines:
-    numbers = list(map(int, pattern.findall(line)))
-    if len(numbers) == 2:
-        results.append(tuple(numbers))
-    elif len(numbers) == 1:
-        results.append(numbers[0])
+results = [[],[],[]]
+for i in range(3):
+    with open(f"images/imginf{i+1}.txt", 'r') as file:
+        lines = file.read().splitlines()
+    pattern = re.compile(r'\d+')
+    for line in lines:
+        numbers = list(map(int, pattern.findall(line)))
+        if len(numbers) == 2:
+            results[i].append(tuple(numbers))
+        elif len(numbers) == 1:
+            results[i].append(numbers[0])
 
 app = None
 class ClickableLabel(QLabel):
@@ -80,13 +81,27 @@ def image_path(image_path):
     new_path = 'images/' + image_path + '.png'
     return new_path
 
+
+image_paths = ['baseimg','cat','dora']  
+copy_image_paths = []  
+images = []
+
+def img_resize(path):
+        baseimg = imageLoad(path)
+        height = baseimg.size[1]
+        if height > 200:
+            rate = 200 / height
+            outputimg = baseimg.resize((int(baseimg.size[0]*rate),200), Image.Resampling.LANCZOS)
+            output_path = os.path.join("images", f"{path}_copy.png")
+            outputimg.save(output_path)
+            copy_image_paths.append(f"images/{path}_copy.png")
+
 def image_location(img1,img2,img3, hwnd):
     pos1x, pos1y, pos2x, pos2y = win32gui.GetWindowRect(hwnd)
     padding = int((pos2x - pos1x - img1.img_width - img2.img_width - img3.img_width) / 4)
     img1.move(pos1x + padding, pos2y - img1.img_height - 167)
     img2.move(pos1x + 2*padding + img1.img_width, pos2y - img2.img_height - 167)
     img3.move(pos1x + 3*padding + img1.img_width + img2.img_width, pos2y - img3.img_height - 167)
-
 
 def enum_child(parent_hwnd):
     child_windows = []
@@ -131,13 +146,13 @@ def makeimg(input, index):
     textbox = 0
     baseimg = imageLoad(image_paths[index])
     rate = 800 / baseimg.size[0]
-    mid = results[0][0] * rate, results[0][1] * rate
-    a, b = results[1][0] * rate, results[1][1] * rate
+    mid = results[index][0][0] * rate, results[index][0][1] * rate
+    a, b = results[index][1][0] * rate, results[index][1][1] * rate
     outputimg = baseimg.copy().resize((800, int(baseimg.size[1]*rate)), Image.Resampling.LANCZOS)
     draw = ImageDraw.Draw(outputimg)
     font_path = os.path.join(font_folder, selected_font.get() + '.ttf')
     text_size = 1
-    font_size = results[2] * rate
+    font_size = results[index][2] * rate
     text = input
 
     while textbox < text_size * 1.33 :
@@ -206,13 +221,14 @@ def img_func(message):
         app = QApplication(sys.argv)
 
     for i, path in enumerate(image_paths):
-        img = ImageWindow(image_path(path), i)
+        img_resize(path)
+        img = ImageWindow(copy_image_paths[i], i)
         img.label.clicked.connect(lambda index, msg=message: on_image_clicked(msg, index)) 
         images.append(img)
 
     hwnd = win32gui.GetForegroundWindow()
     image_location(images[0], images[1], images[2], hwnd)
-    
+
     for i in images:
         i.show()
         bring_to_top(i)
@@ -299,9 +315,6 @@ def on_closing():
     user32.UnhookWindowsHookEx(hooked)
     root.destroy()
 
-
-image_paths = ['baseimg','eee','dora']    
-images = []
 
 Run = False
 root = tk.Tk()
