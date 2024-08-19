@@ -5,7 +5,7 @@ import win32api
 import win32gui
 import time
 import win32clipboard
-from PIL import Image, ImageGrab, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw
 import io
 import pyautogui
 import os
@@ -14,9 +14,8 @@ import tkinter as tk
 from tkinter import ttk
 from math import *
 import re
-import cv2
 
-with open('images/imginf.txt', 'r') as file:
+with open('images/imginf1.txt', 'r') as file:
     lines = file.read().splitlines()
 results = []
 pattern = re.compile(r'\d+')
@@ -45,7 +44,7 @@ def get_text(hwnd):
 
 def setClipboard():
     bitmap = io.BytesIO()
-    imageLoad("output_image").convert("RGB").save(bitmap, "BMP")
+    imageLoad("outputimg").convert("RGB").save(bitmap, "BMP")
     convData = bitmap.getvalue()[14:]
     bitmap.close()
     win32clipboard.OpenClipboard()
@@ -68,7 +67,7 @@ def imageLoad(name):
 def makeimg(input):
     global results
     textbox = 0
-    baseimg = imageLoad("baseimg")
+    baseimg = imageLoad("baseimg1")
     rate = 800 / baseimg.size[0]
     mid = results[0][0] * rate, results[0][1] * rate
     a, b = results[1][0] * rate, results[1][1] * rate
@@ -114,7 +113,7 @@ def makeimg(input):
         draw.text(position, text[:prt], fill="black", font=font)
         text = text[prt:]
 
-    output_path = os.path.join("images", 'output_image.png')
+    output_path = os.path.join("images", 'outputimg.png')
     outputimg.save(output_path)
 
 def active_title():

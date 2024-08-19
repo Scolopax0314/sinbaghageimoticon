@@ -82,7 +82,7 @@ def image_path(image_path):
     return new_path
 
 
-image_paths = ['baseimg','cat','dora']  
+image_paths = ['baseimg1','baseimg2','baseimg3']  
 copy_image_paths = []  
 images = []
 
@@ -121,7 +121,7 @@ def get_text(hwnd):
 
 def setClipboard():
     bitmap = io.BytesIO()
-    imageLoad("output_image").convert("RGB").save(bitmap, "BMP")
+    imageLoad("outputimg").convert("RGB").save(bitmap, "BMP")
     convData = bitmap.getvalue()[14:]
     bitmap.close()
     win32clipboard.OpenClipboard()
@@ -190,7 +190,7 @@ def makeimg(input, index):
         draw.text(position, text[:prt], fill="black", font=font)
         text = text[prt:]
 
-    output_path = os.path.join("images", 'output_image.png')
+    output_path = os.path.join("images", 'outputimg.png')
     outputimg.save(output_path)
 
 def active_title():
