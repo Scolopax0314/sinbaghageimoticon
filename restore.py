@@ -1,19 +1,12 @@
-import ctypes
-import ctypes.wintypes
-import win32con
-import win32api
-import win32gui
-import time
-import win32clipboard
-from PIL import Image, ImageGrab, ImageFont, ImageDraw
-import io
+import ctypes, ctypes.wintypes
+import win32con, win32api, win32gui, win32clipboard
+from PIL import Image, ImageFont, ImageDraw
+import io, os, re, time
 import pyautogui
-import os
 import threading
 import tkinter as tk
 from tkinter import ttk
 from math import *
-import re
 
 import sys
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
@@ -262,9 +255,6 @@ class MSG(ctypes.Structure):
         ("time", ctypes.wintypes.DWORD),
         ("pt", ctypes.wintypes.POINT)
     ]
-
-global Run
-Run = False
 
 def hook(nCode, wParam, lParam):
     if nCode == win32con.HC_ACTION:

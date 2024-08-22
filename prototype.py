@@ -1,19 +1,12 @@
-import ctypes
-import ctypes.wintypes
-import win32con
-import win32api
-import win32gui
-import time
-import win32clipboard
+import ctypes, ctypes.wintypes
+import win32con, win32api, win32gui, win32clipboard
 from PIL import Image, ImageFont, ImageDraw
-import io
+import io, os, re, time
 import pyautogui
-import os
 import threading
 import tkinter as tk
 from tkinter import ttk
 from math import *
-import re
 
 with open('images/imginf1.txt', 'r') as file:
     lines = file.read().splitlines()
@@ -97,10 +90,14 @@ def makeimg(input):
         font_size = int(0.95 * font_size)
 
     rect = sorted(rect, key=lambda x: x[0])
-    while textbox > text_size * 1.33:
+    
+    while textbox > 1.33 * text_size:
         text = ' '+text+' '
         bbox = draw.textbbox((0, 0), text, font=font)
         text_size = (bbox[2] - bbox[0])
+    
+    text = text[1:]
+
     for y, l in rect:
         position = (mid[0] - l, mid[1] + y - font_size)
         bbox = draw.textbbox((0, 0), text, font=font)
@@ -159,9 +156,6 @@ class MSG(ctypes.Structure):
         ("time", ctypes.wintypes.DWORD),
         ("pt", ctypes.wintypes.POINT)
     ]
-
-global Run
-Run = False
 
 def hook(nCode, wParam, lParam):
     if nCode == win32con.HC_ACTION:
