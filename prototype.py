@@ -1,22 +1,14 @@
-import ctypes
-import ctypes.wintypes
-import win32con
-import win32api
-import win32gui
-import time
-import win32clipboard
-from PIL import Image, ImageGrab, ImageFont, ImageDraw
-import io
+import ctypes, ctypes.wintypes
+import win32con, win32api, win32gui, win32clipboard
+from PIL import Image, ImageFont, ImageDraw
+import io, os, re, time
 import pyautogui
-import os
 import threading
 import tkinter as tk
 from tkinter import ttk
 from math import *
-import re
-import cv2
 
-with open('images/imginf.txt', 'r') as file:
+with open('images/imginf1.txt', 'r') as file:
     lines = file.read().splitlines()
 results = []
 pattern = re.compile(r'\d+')
@@ -45,7 +37,7 @@ def get_text(hwnd):
 
 def setClipboard():
     bitmap = io.BytesIO()
-    imageLoad("output_image").convert("RGB").save(bitmap, "BMP")
+    imageLoad("outputimg").convert("RGB").save(bitmap, "BMP")
     convData = bitmap.getvalue()[14:]
     bitmap.close()
     win32clipboard.OpenClipboard()
@@ -68,7 +60,7 @@ def imageLoad(name):
 def makeimg(input):
     global results
     textbox = 0
-    baseimg = imageLoad("baseimg")
+    baseimg = imageLoad("baseimg1")
     rate = 800 / baseimg.size[0]
     mid = results[0][0] * rate, results[0][1] * rate
     a, b = results[1][0] * rate, results[1][1] * rate
@@ -98,10 +90,14 @@ def makeimg(input):
         font_size = int(0.95 * font_size)
 
     rect = sorted(rect, key=lambda x: x[0])
-    while textbox > text_size * 1.33:
+    
+    while textbox > 1.33 * text_size:
         text = ' '+text+' '
         bbox = draw.textbbox((0, 0), text, font=font)
         text_size = (bbox[2] - bbox[0])
+    
+    text = text[1:]
+
     for y, l in rect:
         position = (mid[0] - l, mid[1] + y - font_size)
         bbox = draw.textbbox((0, 0), text, font=font)
@@ -114,7 +110,7 @@ def makeimg(input):
         draw.text(position, text[:prt], fill="black", font=font)
         text = text[prt:]
 
-    output_path = os.path.join("images", 'output_image.png')
+    output_path = os.path.join("images", 'outputimg.png')
     outputimg.save(output_path)
 
 def active_title():
@@ -160,9 +156,6 @@ class MSG(ctypes.Structure):
         ("time", ctypes.wintypes.DWORD),
         ("pt", ctypes.wintypes.POINT)
     ]
-
-global Run
-Run = False
 
 def hook(nCode, wParam, lParam):
     if nCode == win32con.HC_ACTION:
