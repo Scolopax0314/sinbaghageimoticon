@@ -17,7 +17,7 @@ import re
 
 import sys
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 
 results = [[],[],[]]
@@ -68,6 +68,25 @@ class ImageWindow(QWidget):
         self.img_width = int(pixmap.width())
         self.img_height = int(pixmap.height())
 
+
+class RectangleWindow(QWidget):
+    def __init__(self, parent, width, height, x, y, color=QColor(169, 169, 169, 150), thickness=5):
+        super().__init__(parent)
+
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SubWindow)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+        self.setGeometry(x, y, width, height)
+
+        self.color = color
+        self.thickness = thickness
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        painter.fillRect(0, 0, self.width(), self.height(), self.color)
+
 def bring_to_top(window):
     hwnd = int(window.winId())
     win32gui.SetWindowPos(
@@ -96,7 +115,8 @@ def img_resize(path):
             outputimg.save(output_path)
             copy_image_paths.append(f"images/{path}_copy.png")
 
-def image_location(img1,img2,img3, hwnd):
+
+def image_location(img1,img2,img3,hwnd):
     pos1x, pos1y, pos2x, pos2y = win32gui.GetWindowRect(hwnd)
     padding = int((pos2x - pos1x - img1.img_width - img2.img_width - img3.img_width) / 4)
     img1.move(pos1x + padding, pos2y - img1.img_height - 167)
@@ -225,10 +245,14 @@ def img_func(message):
         img = ImageWindow(copy_image_paths[i], i)
         img.label.clicked.connect(lambda index, msg=message: on_image_clicked(msg, index)) 
         images.append(img)
-
     hwnd = win32gui.GetForegroundWindow()
+    pos1x, pos1y, pos2x, pos2y = win32gui.GetWindowRect(hwnd)
+    rect = RectangleWindow(None, pos2x-pos1x,250, 0, 0)
+    rect.move(pos1x,pos2y-397)
     image_location(images[0], images[1], images[2], hwnd)
 
+    rect.show()
+    bring_to_top(rect)
     for i in images:
         i.show()
         bring_to_top(i)
