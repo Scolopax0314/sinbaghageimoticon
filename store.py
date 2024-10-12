@@ -13,7 +13,6 @@ from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
 from PyQt5.QtGui import QPixmap, QPainter, QPen, QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 
-#글자 위치
 results = [[],[],[]]
 for i in range(3):
     with open(f"images/imginf{i+1}.txt", 'r') as file:
@@ -101,24 +100,18 @@ copy_image_paths = []
 images = []
 
 #보이는 사진 크기 재설정
-def img_resize(path,hwnd):
-    pos1x, pos1y, pos2x, pos2y = win32gui.GetWindowRect(hwnd)
-    baseimg = imageLoad(path)
-    width = baseimg.size[0]
-    height = baseimg.size[1]
-    max_height = 200
-    max_width = (pos2x - pos1x)/3 - 20
+def img_resize(path):
+        baseimg = imageLoad(path)
+        max_width = 0
+        height = baseimg.size[1]
+        if height > 200:
+            rate = 200 / height
+            outputimg = baseimg.resize((int(baseimg.size[0]*rate),200), Image.Resampling.LANCZOS)
+            output_path = os.path.join("images", f"{path}_copy.png")
+            outputimg.save(output_path)
+            copy_image_paths.append(f"images/{path}_copy.png")
 
-    if max_height/max_width > height/width:#비율이 큰쪽을 중심으로 크기 조정
-        rate = max_width / width
-    else:
-        rate = max_height / height 
-    outputimg = baseimg.resize((int(width*rate),int(height*rate)), Image.Resampling.LANCZOS)
-    output_path = os.path.join("images", f"{path}_copy.png")
-    outputimg.save(output_path)
-    copy_image_paths.append(f"images/{path}_copy.png")
-
-#사진 위치(수정필요)
+#사진 위치
 def image_location(img1,img2,img3,hwnd):
     pos1x, pos1y, pos2x, pos2y = win32gui.GetWindowRect(hwnd)
     padding = int((pos2x - pos1x - img1.img_width - img2.img_width - img3.img_width) / 4)
@@ -243,15 +236,13 @@ def img_func(message):
     if app is None:
         app = QApplication(sys.argv)
 
-    hwnd = win32gui.GetForegroundWindow()
-    pos1x, pos1y, pos2x, pos2y = win32gui.GetWindowRect(hwnd)
-    
     for i, path in enumerate(image_paths):
-        img_resize(path,hwnd)
+        img_resize(path)
         img = ImageWindow(copy_image_paths[i], i)
         img.label.clicked.connect(lambda index, msg=message: on_image_clicked(msg, index)) 
         images.append(img)
-    
+    hwnd = win32gui.GetForegroundWindow()
+    pos1x, pos1y, pos2x, pos2y = win32gui.GetWindowRect(hwnd)
     rect = RectangleWindow(None, pos2x-pos1x,250, 0, 0)
     rect.move(pos1x,pos2y-397)
     image_location(images[0], images[1], images[2], hwnd)
